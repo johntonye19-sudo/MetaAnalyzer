@@ -1,18 +1,14 @@
 # MetaAnalyzer development progress
 
-## Current milestone: evidence-management foundation
+## Evidence management milestone
 
-Implemented in this milestone:
+- Investigation-scoped uploads, persistent evidence and metadata records, SHA-256 integrity verification, immutable local evidence storage, and intake custody logging are implemented.
+- Metadata extraction is available on demand via `POST /api/investigations/{investigation_id}/evidence/{evidence_id}/extract`.
+- The extraction engine classifies known file signatures, extracts available metadata for images, PDF and Office documents, audio/video (MediaInfo), email, text/JSON/XML/HTML, ZIP archives, and offline PCAP/PCAPNG when dependencies are available.
+- Extraction records include tool/source, status, limitations/warnings, and filesystem timestamp context. Original evidence is verified before extraction and never modified.
+- Archives are inspected without extracting their contents; HTML is parsed inertly without network fetches; email IP data is not geolocated; the offline network parser does not capture traffic.
 
-- Investigation-scoped evidence upload and listing APIs.
-- Generated storage identifiers; client filenames are display metadata only.
-- Streamed SHA-256 calculation with a configured hard upload-size limit.
-- Atomic no-clobber local storage, restrictive directory/file permissions, and hash verification before download.
-- Persistent evidence, intake metadata, and chain-of-custody records.
-- Alembic migration `0003` and SQLite model bootstrapping.
-- API tests for upload, filename path sanitization, metadata intake, and hash verification.
-
-Evidence content is not executed. The stored MIME type is client-declared or filename-guessed and is explicitly not a content validation result. Extraction is pending; this milestone does not claim metadata extraction support.
+Optional parser/tool availability is reported as warnings. Extraction currently runs in a worker thread within the API process, with parser limits/timeouts where applicable; it is not yet isolated in a dedicated sandbox or Celery worker. Treat uploaded files as untrusted and deploy behind suitable resource limits until sandboxed processing is implemented.
 
 ## Run and test
 
