@@ -1,29 +1,25 @@
-# MetaAnalyzer development plan
+# MetaAnalyzer development progress
 
-## Architecture decision
+## Current milestone: evidence-management foundation
 
-- FastAPI provides the HTTP and OpenAPI API boundary.
-- SQLAlchemy 2.x is used with async PostgreSQL.
-- PostgreSQL is the production database; SQLite is supported by later offline configuration.
-- Celery and Redis provide asynchronous evidence processing.
-- React/Vite/TypeScript provides the responsive investigation interface.
-- Original evidence will be written to immutable storage and never overwritten.
+Implemented in this milestone:
 
-## Phase 1 scope
+- Investigation-scoped evidence upload and listing APIs.
+- Generated storage identifiers; client filenames are display metadata only.
+- Streamed SHA-256 calculation with a configured hard upload-size limit.
+- Atomic no-clobber local storage, restrictive directory/file permissions, and hash verification before download.
+- Persistent evidence, intake metadata, and chain-of-custody records.
+- Alembic migration `0003` and SQLite model bootstrapping.
+- API tests for upload, filename path sanitization, metadata intake, and hash verification.
 
-Implemented incrementally:
+Evidence content is not executed. The stored MIME type is client-declared or filename-guessed and is explicitly not a content validation result. Extraction is pending; this milestone does not claim metadata extraction support.
 
-- Repository structure
-- Application configuration
-- Health and readiness endpoints
-- Database base and initial migration
-- Authentication foundations
-- Docker Compose topology
-- Backend and frontend test harnesses
-
-## Commands
+## Run and test
 
 ```bash
-cp .env.example .env
-docker compose up --build
+cd backend
+python -m pip install -r requirements.txt
+pytest -q
 ```
+
+Apply production migrations from `backend/` with `alembic upgrade head`. Local SQLite startup uses SQLAlchemy metadata creation.
