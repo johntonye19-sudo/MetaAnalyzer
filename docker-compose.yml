@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: metaanalyzer
+      POSTGRES_USER: metaanalyzer
+      POSTGRES_PASSWORD: metaanalyzer
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metaanalyzer -d metaanalyzer"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://metaanalyzer:metaanalyzer@postgres:5432/metaanalyzer
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_ROOT: /var/lib/metaanalyzer/evidence
+    volumes:
+      - evidence_data:/var/lib/metaanalyzer/evidence
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  evidence_data:
