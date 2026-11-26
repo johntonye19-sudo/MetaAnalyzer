@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from app.core.config import get_settings
 from app.core.models import Base
 import app.auth.entities  # noqa: F401
+import app.investigations.entities  # noqa: F401
 
 config = context.config
 settings = get_settings()
